@@ -54,7 +54,7 @@ const Navbar: React.FC = () => {
               <div className="relative">
                 <div className="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-800/30 dark:to-teal-800/30 rounded-2xl flex items-center justify-center shadow-sm group-hover:shadow-md transition-all duration-300 group-hover:scale-105">
                   <Image 
-                    src="/image/home.jpg" 
+                    src="/images/home.jpg" 
                     alt="Logo" 
                     width={40} 
                     height={40} 

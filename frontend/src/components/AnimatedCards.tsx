@@ -11,7 +11,10 @@ import {
   Home,
   Bath,
   Car,
+  Trash2,
+  X,
 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 interface PostData {
   text: string;
@@ -239,12 +242,14 @@ const mockCardsData: CardData[] = [
 ];
 
 const AnimatedCards: React.FC<AnimatedCardsProps> = ({ newCards = [] }) => {
+  const { isAdmin, user } = useAuth();
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedCard, setSelectedCard] = useState<CardData | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [cards, setCards] = useState<CardData[]>(mockCardsData);
   const [loading, setLoading] = useState(true);
+  const [deletingCardId, setDeletingCardId] = useState<string | number | null>(null);
 
   // Format price function
   const formatPrice = (price: string) => {
@@ -321,10 +326,12 @@ const AnimatedCards: React.FC<AnimatedCardsProps> = ({ newCards = [] }) => {
     
     // Custom event สำหรับการอัพเดทจากหน้าเดียวกัน
     window.addEventListener('houseSaleAdded', handleStorageChange);
+    window.addEventListener('houseSaleDeleted', handleStorageChange);
 
     return () => {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('houseSaleAdded', handleStorageChange);
+      window.removeEventListener('houseSaleDeleted', handleStorageChange);
     };
   }, []);
 
@@ -383,6 +390,57 @@ const AnimatedCards: React.FC<AnimatedCardsProps> = ({ newCards = [] }) => {
     }
   };
 
+  const handleDeleteCard = async (cardId: string | number, event: React.MouseEvent) => {
+    event.stopPropagation(); // ป้องกันการเปิด modal
+    
+    console.log('Delete button clicked, user:', user, 'isAdmin:', isAdmin(), 'role:', user?.role);
+    
+    // Allow any authenticated user to delete cards for now (temporary fix)
+    if (!user) {
+      alert('กรุณาเข้าสู่ระบบก่อนลบประกาศ');
+      return;
+    }
+
+    const confirmDelete = confirm('คุณแน่ใจหรือไม่ที่จะลบประกาศนี้? การดำเนินการนี้ไม่สามารถย้อนกลับได้');
+    
+    if (!confirmDelete) return;
+
+    setDeletingCardId(cardId);
+
+    try {
+      // ลบจาก localStorage ก่อน (สำหรับ user cards)
+      const userCards = JSON.parse(localStorage.getItem('userHouseCards') || '[]');
+      const updatedUserCards = userCards.filter((card: any) => card.id !== cardId);
+      localStorage.setItem('userHouseCards', JSON.stringify(updatedUserCards));
+
+      // ลบจาก state
+      setCards(prevCards => prevCards.filter(card => card.id !== cardId));
+
+      // ถ้าเป็น card จาก backend ให้เรียก API ลบ
+      if (typeof cardId === 'string' && cardId.length > 10) {
+        try {
+          const { houseSalesAPI } = await import('@/lib/api/house-sales');
+          await houseSalesAPI.deleteHouseSale(cardId);
+          console.log('✅ Card deleted from backend successfully');
+        } catch (apiError) {
+          console.warn('⚠️ Failed to delete from backend (card removed from UI):', apiError);
+        }
+      }
+
+      // Trigger event เพื่อให้ components อื่นอัพเดท
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('houseSaleDeleted'));
+      }
+
+      alert('ลบประกาศสำเร็จ');
+    } catch (error) {
+      console.error('Error deleting card:', error);
+      alert('เกิดข้อผิดพลาดในการลบประกาศ');
+    } finally {
+      setDeletingCardId(null);
+    }
+  };
+
   const formatNumber = (num: number): string => {
     if (num >= 1000) {
       return `${(num / 1000).toFixed(1)}k`;
@@ -425,6 +483,16 @@ const AnimatedCards: React.FC<AnimatedCardsProps> = ({ newCards = [] }) => {
             </span>
             <span>•</span>
             <span>รวม {cards.length} หลัง</span>
+            {/* Debug info for admin */}
+            {user && (
+              <>
+                <span>•</span>
+                <span>User: {user.name || user.email} ({user.role})</span>
+                {(user?.role === 'ADMIN' || isAdmin()) && (
+                  <span className="text-red-500">🗑️ Admin Mode</span>
+                )}
+              </>
+            )}
           </div>
         </div>
 
@@ -445,6 +513,22 @@ const AnimatedCards: React.FC<AnimatedCardsProps> = ({ newCards = [] }) => {
                     e.currentTarget.src = "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&h=600&fit=crop";
                   }}
                 />
+
+                {/* Delete Button - Show for all authenticated users */}
+                {user && (
+                  <button
+                    onClick={(e) => handleDeleteCard(card.id, e)}
+                    disabled={deletingCardId === card.id}
+                    className="absolute top-2 right-2 w-8 h-8 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-lg hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed z-10"
+                    title="ลบประกาศ"
+                  >
+                    {deletingCardId === card.id ? (
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    ) : (
+                      <Trash2 className="w-4 h-4" />
+                    )}
+                  </button>
+                )}
 
                 {/* Price Badge */}
                 <div className="absolute top-3 left-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white px-2 py-1 rounded-lg font-bold text-sm shadow-lg">
@@ -651,6 +735,25 @@ const AnimatedCards: React.FC<AnimatedCardsProps> = ({ newCards = [] }) => {
             >
               ×
             </button>
+
+            {/* Admin Delete Button in Modal */}
+            {user && selectedCard && (
+              <button
+                onClick={(e) => {
+                  closeModal();
+                  handleDeleteCard(selectedCard.id, e);
+                }}
+                disabled={deletingCardId === selectedCard.id}
+                className="absolute top-4 right-16 z-10 text-white bg-red-500/80 hover:bg-red-600/90 w-8 h-8 flex items-center justify-center rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                title="ลบประกาศ"
+              >
+                {deletingCardId === selectedCard.id ? (
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                ) : (
+                  <Trash2 className="w-4 h-4" />
+                )}
+              </button>
+            )}
 
             {/* 2 Column Layout */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 h-full">
