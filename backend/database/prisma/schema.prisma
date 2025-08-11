@@ -1,0 +1,185 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  password     String
+  name         String?
+  role         UserRole @default(USER)
+  isActive     Boolean  @default(true)
+  refreshToken String?
+  profileImage String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  posts Post[]
+  files File[]
+  houseSales HouseSale[]
+  favorites Favorite[]
+
+  @@map("users")
+}
+
+model Post {
+  id        String   @id @default(cuid())
+  title     String
+  content   String?
+  published Boolean  @default(false)
+  authorId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  files  File[]
+
+  @@map("posts")
+}
+
+enum FileType {
+  IMAGE
+  DOCUMENT
+  VIDEO
+  AUDIO
+  OTHER
+}
+
+enum FileStatus {
+  UPLOADING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+model File {
+  id           String     @id @default(cuid())
+  originalName String
+  filename     String     @unique
+  mimetype     String
+  size         Int
+  type         FileType
+  status       FileStatus @default(UPLOADING)
+  path         String
+  url          String?
+  thumbnail    String?
+  metadata     Json?
+  uploadedById String
+  postId       String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  uploadedBy User  @relation(fields: [uploadedById], references: [id], onDelete: Cascade)
+  post       Post? @relation(fields: [postId], references: [id], onDelete: SetNull)
+
+  @@map("files")
+}
+
+model FileChunk {
+  id         String   @id @default(cuid())
+  fileId     String
+  chunkIndex Int
+  data       Bytes
+  createdAt  DateTime @default(now())
+
+  @@unique([fileId, chunkIndex])
+  @@map("file_chunks")
+}
+model HouseSale {
+  id          String   @id @default(cuid())
+  
+  // สถานะการโพสต์
+  status      String   @default("saved") // "saved" หรือ "published"
+  publishedAt DateTime?
+  
+  // ข้อมูลพื้นฐาน
+  title       String
+  description String?
+  price       String
+  priceNumeric Float?  // สำหรับการค้นหาและเรียงลำดับ
+  negotiable  Boolean  @default(false)
+  downPayment String?
+  installmentAvailable Boolean @default(false)
+  
+  // ที่อยู่และทำเล
+  location    String
+  province    String?
+  district    String?
+  subDistrict String?
+  postalCode  String?
+  
+  // รายละเอียดบ้าน
+  houseType   String
+  bedrooms    Int
+  bathrooms   Int
+  floors      Int?
+  usableArea  String?
+  landArea    String?
+  
+  // เอกสารกฎหมาย
+  titleDeed   Boolean  @default(true)
+  titleDeedNumber String?
+  ownership   String?
+  legalIssues Boolean  @default(false)
+  legalIssuesDetail String?
+  
+  // สิ่งอำนวยความสะดวก
+  parkingSpaces Int @default(0)
+  hasSwimmingPool Boolean @default(false)
+  hasGarden   Boolean @default(false)
+  hasSecurity Boolean @default(false)
+  hasElevator Boolean @default(false)
+  hasAirConditioner Boolean @default(false)
+  hasBuiltInFurniture Boolean @default(false)
+  
+  // ข้อมูลผู้ขาย
+  sellerName  String
+  sellerPhone String
+  sellerEmail String?
+  sellerType  String?
+  
+  // เหตุผลในการขาย
+  saleReason  String?
+  urgentSale  Boolean @default(false)
+  
+  // รูปภาพและป้ายกำกับ
+  images      String[] @default([])
+  badges      String[] @default([])
+  
+  // สถิติ
+  views       Int @default(0)
+  contacts    Int @default(0)
+  
+  // ความสัมพันธ์
+  userId      String
+  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  favorites   Favorite[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("house_sales")
+}
+
+model Favorite {
+  id          String @id @default(cuid())
+  userId      String
+  houseSaleId String
+  createdAt   DateTime @default(now())
+
+  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  houseSale   HouseSale @relation(fields: [houseSaleId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, houseSaleId])
+  @@map("favorites")
+}

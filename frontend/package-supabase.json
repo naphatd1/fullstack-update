@@ -1,0 +1,7 @@
+{
+  "name": "supabase-dependency",
+  "description": "Add this to your package.json dependencies",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0"
+  }
+}
