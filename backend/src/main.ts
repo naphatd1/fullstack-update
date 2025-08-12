@@ -13,13 +13,12 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   // Serve static files
-  app.useStaticAssets(join(__dirname, '..', 'uploads'), {
-    prefix: '/uploads/',
+  app.useStaticAssets(join(__dirname, "..", "uploads"), {
+    prefix: "/uploads/",
   });
 
   // Compression middleware
   app.use(compression());
-
   // Security middleware with custom configuration
   app.use(
     helmet({
@@ -121,7 +120,9 @@ async function bootstrap() {
         "http://localhost:3001",
         "http://localhost:5173",
         // Add origins from environment variable
-        ...(process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',').map(origin => origin.trim()) : []),
+        ...(process.env.CORS_ORIGIN
+          ? process.env.CORS_ORIGIN.split(",").map((origin) => origin.trim())
+          : []),
       ];
 
       if (allowedOrigins.includes(origin)) {
