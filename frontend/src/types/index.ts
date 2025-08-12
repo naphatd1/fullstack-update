@@ -2,7 +2,7 @@ export interface User {
   id: string;
   email: string;
   name?: string;
-  role: 'USER' | 'ADMIN';
+  role: "USER" | "ADMIN";
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -37,8 +37,8 @@ export interface FileUpload {
   filename: string;
   mimetype: string;
   size: number;
-  type: 'IMAGE' | 'DOCUMENT' | 'VIDEO' | 'AUDIO' | 'OTHER';
-  status: 'UPLOADING' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
+  type: "IMAGE" | "DOCUMENT" | "VIDEO" | "AUDIO" | "OTHER";
+  status: "UPLOADING" | "PROCESSING" | "COMPLETED" | "FAILED";
   url?: string;
   thumbnail?: string;
   createdAt: string;
@@ -57,7 +57,7 @@ export interface ApiError {
 }
 
 export interface HealthStatus {
-  status: 'ok' | 'error';
+  status: "ok" | "error";
   timestamp: string;
   uptime: number;
   responseTime?: string;

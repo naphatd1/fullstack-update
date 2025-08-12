@@ -87,6 +87,7 @@ const HouseSaleForm: React.FC<HouseSaleFormProps> = ({ onSubmit, onClose }) => {
     // รูปภาพ
     images: [],
     badges: [],
+    selectedBadges: [],
   });
 
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
@@ -139,6 +140,24 @@ const HouseSaleForm: React.FC<HouseSaleFormProps> = ({ onSubmit, onClose }) => {
     "อื่นๆ",
   ];
 
+  const availableBadges = [
+    { id: "new", label: "รีโนเวทใหม่", color: "bg-green-500" },
+    { id: "ready", label: "พร้อมอยู่", color: "bg-blue-500" },
+    { id: "urgent", label: "ขายด่วน", color: "bg-red-500" },
+    { id: "negotiable", label: "ราคาต่อรองได้", color: "bg-yellow-500" },
+    { id: "furnished", label: "เฟอร์นิเจอร์ครบ", color: "bg-purple-500" },
+    { id: "pool", label: "มีสระว่ายน้ำ", color: "bg-cyan-500" },
+    { id: "security", label: "รักษาความปลอดภัย", color: "bg-orange-500" },
+    { id: "parking", label: "ที่จอดรถเยอะ", color: "bg-gray-500" },
+    { id: "garden", label: "มีสวน", color: "bg-emerald-500" },
+    { id: "modern", label: "สไตล์โมเดิร์น", color: "bg-indigo-500" },
+    { id: "quiet", label: "ย่านเงียบสงบ", color: "bg-teal-500" },
+    { id: "convenient", label: "ทำเลสะดวก", color: "bg-pink-500" },
+    { id: "investment", label: "เหมาะลงทุน", color: "bg-amber-500" },
+    { id: "family", label: "เหมาะครอบครัว", color: "bg-lime-500" },
+    { id: "luxury", label: "หรูหรา", color: "bg-rose-500" },
+  ];
+
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
@@ -165,6 +184,32 @@ const HouseSaleForm: React.FC<HouseSaleFormProps> = ({ onSubmit, onClose }) => {
     }));
   };
 
+  const handleBadgeToggle = (badgeId: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      selectedBadges: prev.selectedBadges.includes(badgeId)
+        ? prev.selectedBadges.filter(id => id !== badgeId)
+        : [...prev.selectedBadges, badgeId],
+    }));
+  };
+
+  // Generate folder name automatically
+  const generateFolderName = () => {
+    const timestamp = Date.now();
+    const randomId = Math.random().toString(36).substring(2, 8);
+    const houseType = formData.houseType.toLowerCase();
+    const location = formData.province || 'bangkok';
+    
+    // Create a clean folder name
+    const folderName = `house_${houseType}_${location}_${timestamp}_${randomId}`
+      .replace(/[^\w\s-]/g, '')
+      .replace(/\s+/g, '_')
+      .replace(/_{2,}/g, '_')
+      .toLowerCase();
+    
+    return folderName;
+  };
+
 
 
 
@@ -178,18 +223,26 @@ const HouseSaleForm: React.FC<HouseSaleFormProps> = ({ onSubmit, onClose }) => {
       return;
     }
 
-    // Generate badges based on form data
-    const generatedBadges = [];
-    if (formData.urgentSale) generatedBadges.push("ขายด่วน");
-    if (formData.negotiable) generatedBadges.push("ราคาต่อรองได้");
-    if (formData.hasSwimmingPool) generatedBadges.push("มีสระว่ายน้ำ");
-    if (formData.hasSecurity) generatedBadges.push("รักษาความปลอดภัย");
-    if (formData.titleDeed) generatedBadges.push("มีโฉนด");
-    if (formData.installmentAvailable) generatedBadges.push("ผ่อนได้");
+    // Combine selected badges with auto-generated badges
+    const autoBadges = [];
+    if (formData.urgentSale) autoBadges.push("ขายด่วน");
+    if (formData.negotiable) autoBadges.push("ราคาต่อรองได้");
+    if (formData.hasSwimmingPool) autoBadges.push("มีสระว่ายน้ำ");
+    if (formData.hasSecurity) autoBadges.push("รักษาความปลอดภัย");
+    if (formData.titleDeed) autoBadges.push("มีโฉนด");
+    if (formData.installmentAvailable) autoBadges.push("ผ่อนได้");
+
+    // Get selected badge labels
+    const selectedBadgeLabels = formData.selectedBadges.map(badgeId => 
+      availableBadges.find(badge => badge.id === badgeId)?.label
+    ).filter(Boolean);
+
+    // Combine and remove duplicates
+    const allBadges = [...new Set([...selectedBadgeLabels, ...autoBadges])];
 
     const finalData = {
       ...formData,
-      badges: generatedBadges,
+      badges: allBadges,
       images: formData.images.length > 0 ? formData.images : [
         "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&h=600&fit=crop"
       ],
@@ -337,6 +390,44 @@ const HouseSaleForm: React.FC<HouseSaleFormProps> = ({ onSubmit, onClose }) => {
             </option>
           ))}
         </select>
+      </div>
+
+      {/* Badge Selector */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-3">
+          เลือก Badge ที่ต้องการแสดง (เลือกได้สูงสุด 3 อัน)
+        </label>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+          {availableBadges.map((badge) => (
+            <button
+              key={badge.id}
+              type="button"
+              onClick={() => handleBadgeToggle(badge.id)}
+              disabled={!formData.selectedBadges.includes(badge.id) && formData.selectedBadges.length >= 3}
+              className={`
+                relative p-3 rounded-lg border-2 transition-all duration-200 text-sm font-medium
+                ${formData.selectedBadges.includes(badge.id)
+                  ? `${badge.color} text-white border-transparent shadow-lg transform scale-105`
+                  : 'bg-white text-gray-700 border-gray-200 hover:border-gray-300 hover:shadow-md'
+                }
+                ${!formData.selectedBadges.includes(badge.id) && formData.selectedBadges.length >= 3
+                  ? 'opacity-50 cursor-not-allowed'
+                  : 'cursor-pointer'
+                }
+              `}
+            >
+              {badge.label}
+              {formData.selectedBadges.includes(badge.id) && (
+                <div className="absolute -top-1 -right-1 w-5 h-5 bg-white text-green-600 rounded-full flex items-center justify-center text-xs font-bold">
+                  ✓
+                </div>
+              )}
+            </button>
+          ))}
+        </div>
+        <p className="text-xs text-gray-500 mt-2">
+          เลือกแล้ว: {formData.selectedBadges.length}/3 • Badge จะช่วยให้ประกาศของคุณโดดเด่นและดึงดูดผู้ซื้อมากขึ้น
+        </p>
       </div>
 
       {/* Description */}
@@ -872,13 +963,14 @@ const HouseSaleForm: React.FC<HouseSaleFormProps> = ({ onSubmit, onClose }) => {
         </label>
         
         {/* แสดงชื่อ folder ที่จะใช้ */}
-        {formData.title && (
-          <div className="mb-3 p-2 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-sm text-blue-700">
-              📁 รูปภาพจะถูกจัดเก็บในโฟลเดอร์: <span className="font-medium">{formData.title.replace(/[^\w\s-]/g, '').replace(/\s+/g, '_').toLowerCase()}</span>
-            </p>
-          </div>
-        )}
+        <div className="mb-3 p-2 bg-blue-50 border border-blue-200 rounded-lg">
+          <p className="text-sm text-blue-700">
+            📁 รูปภาพจะถูกจัดเก็บในโฟลเดอร์: <span className="font-medium">{generateFolderName()}</span>
+          </p>
+          <p className="text-xs text-blue-600 mt-1">
+            💡 ชื่อโฟลเดอร์จะถูกสร้างอัตโนมัติเพื่อให้เข้ากันได้กับ Supabase Storage
+          </p>
+        </div>
 
         {/* Progress Bar */}
         {isUploading && (
@@ -899,7 +991,7 @@ const HouseSaleForm: React.FC<HouseSaleFormProps> = ({ onSubmit, onClose }) => {
         {/* คำแนะนำ */}
         <div className="mb-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
           <p className="text-sm text-yellow-700">
-            💡 <strong>คำแนะนำ:</strong> กรุณากรอกชื่อประกาศก่อนอัพโหลดรูปภาพ เพื่อให้ระบบสร้างโฟลเดอร์ในชื่อที่เหมาะสม
+            💡 <strong>คำแนะนำ:</strong> ระบบจะสร้างชื่อโฟลเดอร์อัตโนมัติตามประเภทบ้าน จังหวัด และเวลาที่อัพโหลด
           </p>
         </div>
 
@@ -958,15 +1050,8 @@ const HouseSaleForm: React.FC<HouseSaleFormProps> = ({ onSubmit, onClose }) => {
                   // Try Supabase upload
                   try {
                     const { storageService } = await import('@/lib/supabase-storage');
-                    // ใช้ชื่อประกาศเป็นชื่อ folder หรือใช้ default ถ้ายังไม่ได้กรอก
-                    const rawFolderName = formData.title || `house-${Date.now()}`;
-                    // ทำความสะอาดชื่อ folder (ลบอักขระพิเศษ)
-                    const folderName = rawFolderName
-                      .replace(/[^\w\s-]/g, '')
-                      .replace(/\s+/g, '_')
-                      .replace(/_{2,}/g, '_')
-                      .replace(/^_|_$/g, '')
-                      .toLowerCase();
+                    // ใช้ชื่อ folder ที่ generate อัตโนมัติ
+                    const folderName = generateFolderName();
                     const result = await storageService.uploadHouseImage(
                       file, 
                       folderName, 

@@ -15,6 +15,9 @@ import {
   X,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import ConfirmDialog from "./ConfirmDialog";
+import SuccessDialog from "./SuccessDialog";
+import ErrorDialog from "./ErrorDialog";
 
 interface PostData {
   text: string;
@@ -147,6 +150,11 @@ const loadPostsData = async (): Promise<CardData[]> => {
     const response = await fetch("/posts.json");
     const posts: PostData[] = await response.json();
 
+    // Return empty array if no posts
+    if (!posts || posts.length === 0) {
+      return [];
+    }
+
     return posts.map((post, index) => {
       const cardData = parsePropertyData(post.text, index);
       return {
@@ -159,87 +167,12 @@ const loadPostsData = async (): Promise<CardData[]> => {
     });
   } catch (error) {
     console.error("Error loading posts data:", error);
-    return mockCardsData;
+    return [];
   }
 };
 
-const mockCardsData: CardData[] = [
-  {
-    id: 1,
-    title: "บ้านเดี่ยวโมเดิร์น 2 ชั้น",
-    description:
-      "บ้านสไตล์โมเดิร์นมินิมอล ตกแต่งพร้อมอยู่ ใกล้ห้างสรรพสินค้า โรงเรียน และโรงพยาบาล เดินทางสะดวก",
-    image:
-      "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&h=600&fit=crop&crop=entropy&auto=format",
-    badges: ["ยอดนิยม", "แนะนำ"],
-    stats: { views: 2547, likes: 189, rating: 4.8 },
-    date: "2024-01-15",
-    category: "บ้านเดี่ยว",
-    price: "4,500,000",
-    location: "บางนา-ตราด กม.15",
-    bedrooms: 3,
-    bathrooms: 2,
-    floors: 2,
-    parkingSpaces: 2,
-    usableArea: "180 ตร.ม.",
-    landArea: "50 ตร.ว.",
-    fullText:
-      "บ้านเดี่ยวโมเดิร์น 2 ชั้น สไตล์มินิมอล\n\n🏠 รายละเอียดบ้าน\n🌿 3 ห้องนอน 2 ห้องน้ำ\n🌿 พื้นที่ใช้สอย 180 ตร.ม.\n🌿 ที่จอดรถ 2 คัน\n🌿 ตกแต่งพร้อมอยู่\n\n✅ ทำเลดี ใกล้สิ่งอำนวยความสะดวก\n✅ ใกล้ห้างสรรพสินค้า โรงเรียน โรงพยาบาล\n✅ เดินทางสะดวก เข้า-ออกหลายเส้นทาง",
-    imageUrls: [
-      "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&h=600&fit=crop&crop=entropy&auto=format",
-    ],
-  },
-  {
-    id: 2,
-    title: "วิลล่าหรู พร้อมสระว่ายน้ำ",
-    description:
-      "วิลล่าสุดหรู ดีไซน์ร่วมสมัย พร้อมสระว่ายน้ำส่วนตัว สวนสวย และที่จอดรถ 3 คัน ในย่านเอกมัย",
-    image:
-      "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&h=600&fit=crop&crop=entropy&auto=format",
-    badges: ["ใหม่", "หรู"],
-    stats: { views: 1832, likes: 145, rating: 4.6 },
-    date: "2024-01-12",
-    category: "วิลล่า",
-    price: "12,800,000",
-    location: "เอกมัย-รามอินทรา",
-    bedrooms: 4,
-    bathrooms: 3,
-    floors: 3,
-    parkingSpaces: 3,
-    usableArea: "350 ตร.ม.",
-    landArea: "120 ตร.ว.",
-    fullText:
-      "🏡 วิลล่าหรู พร้อมสระว่ายน้ำ\n\n💎 คุณสมบัติพิเศษ\n🌿 4 ห้องนอน 3 ห้องน้ำ\n🌿 สระว่ายน้ำส่วนตัว\n🌿 สวนสวยจัดแต่ง\n🌿 ที่จอดรถ 3 คัน\n🌿 พื้นที่ 350 ตร.ม.\n\n✅ ย่านเอกมัย-รามอินทรา\n✅ ดีไซน์ร่วมสมัย\n✅ ความเป็นส่วนตัวสูง",
-    imageUrls: [
-      "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&h=600&fit=crop&crop=entropy&auto=format",
-    ],
-  },
-  {
-    id: 3,
-    title: "บ้านครอบครัว ย่านเงียบสงบ",
-    description:
-      "บ้านเดี่ยวในโครงการ ย่านเงียบสงบ เหมาะสำหรับครอบครัว มีสวนหน้าบ้าน ที่จอดรถ 2 คัน",
-    image:
-      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&h=600&fit=crop&crop=entropy&auto=format",
-    badges: ["เงียบสงบ", "ครอบครัว"],
-    stats: { views: 3156, likes: 234, rating: 4.9 },
-    date: "2024-01-10",
-    category: "บ้านเดี่ยว",
-    price: "2,900,000",
-    location: "ลาดกระบัง",
-    bedrooms: 3,
-    bathrooms: 2,
-    floors: 2,
-    parkingSpaces: 2,
-    usableArea: "120 ตร.ม.",
-    landArea: "35 ตร.ว.",
-    fullText:
-      "🏠 บ้านครอบครัว ย่านเงียบสงบ\n\n🌿 รายละเอียดบ้าน\n🌿 3 ห้องนอน 2 ห้องน้ำ\n🌿 สวนหน้าบ้าน\n🌿 ที่จอดรถ 2 คัน\n🌿 พื้นที่ 120 ตร.ม.\n\n✅ ย่านเงียบสงบ เหมาะสำหรับครอบครัว\n✅ ใกล้โรงเรียน ตลาด\n✅ ชุมชนน่าอยู่ ปลอดภัย",
-    imageUrls: [
-      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&h=600&fit=crop&crop=entropy&auto=format",
-    ],
-  },
-];
+// Mock data removed - only show real user posts and API data
+const mockCardsData: CardData[] = [];
 
 const AnimatedCards: React.FC<AnimatedCardsProps> = ({ newCards = [] }) => {
   const { isAdmin, user } = useAuth();
@@ -247,9 +180,44 @@ const AnimatedCards: React.FC<AnimatedCardsProps> = ({ newCards = [] }) => {
   const [selectedCard, setSelectedCard] = useState<CardData | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [cards, setCards] = useState<CardData[]>(mockCardsData);
+  const [cards, setCards] = useState<CardData[]>([]);
   const [loading, setLoading] = useState(true);
   const [deletingCardId, setDeletingCardId] = useState<string | number | null>(null);
+
+  
+  // Dialog states
+  const [confirmDialog, setConfirmDialog] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+    type?: 'danger' | 'warning' | 'info';
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {},
+  });
+  
+  const [successDialog, setSuccessDialog] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+  });
+  
+  const [errorDialog, setErrorDialog] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+  });
 
   // Format price function
   const formatPrice = (price: string) => {
@@ -269,21 +237,42 @@ const AnimatedCards: React.FC<AnimatedCardsProps> = ({ newCards = [] }) => {
     const loadData = async () => {
       setLoading(true);
       try {
+
         // โหลดข้อมูลจาก API
         const postsData = await loadPostsData();
         
         // โหลดข้อมูลจาก localStorage (บ้านที่ผู้ใช้เพิ่มเอง)
         const userCards = JSON.parse(localStorage.getItem('userHouseCards') || '[]');
         
-        // รวมข้อมูลทั้งหมด (ข้อมูลผู้ใช้ไว้ด้านบน)
+        // รวมข้อมูลจาก user posts และ API เท่านั้น (ไม่มี mock data)
         const allCards = [...userCards, ...postsData];
-        setCards(allCards);
+        
+        // กรอง duplicate cards โดยใช้ ID เป็นหลัก
+        const uniqueCards = allCards.filter((card, index, self) => 
+          index === self.findIndex(c => c.id === card.id)
+        );
+        
+        console.log('📊 Cards loaded:', {
+          userCards: userCards.length,
+          postsData: postsData.length,
+          total: allCards.length,
+          unique: uniqueCards.length
+        });
+        
+        setCards(uniqueCards);
       } catch (error) {
         console.error("Failed to load data:", error);
         
-        // ถ้าโหลด API ไม่ได้ ให้ใช้ข้อมูลผู้ใช้ + mock data
+        // ถ้าโหลด API ไม่ได้ ให้ใช้ข้อมูลผู้ใช้เท่านั้น
         const userCards = JSON.parse(localStorage.getItem('userHouseCards') || '[]');
-        setCards([...userCards, ...mockCardsData]);
+        
+        // กรอง duplicate cards
+        const allCards = [...userCards];
+        const uniqueCards = allCards.filter((card, index, self) => 
+          index === self.findIndex(c => c.id === card.id)
+        );
+        
+        setCards(uniqueCards);
       } finally {
         setLoading(false);
       }
@@ -309,10 +298,23 @@ const AnimatedCards: React.FC<AnimatedCardsProps> = ({ newCards = [] }) => {
       const postsData = await loadPostsData();
       const userCards = JSON.parse(localStorage.getItem('userHouseCards') || '[]');
       const allCards = [...userCards, ...postsData];
-      setCards(allCards);
+      
+      // กรอง duplicate cards
+      const uniqueCards = allCards.filter((card, index, self) => 
+        index === self.findIndex(c => c.id === card.id)
+      );
+      
+      setCards(uniqueCards);
     } catch (error) {
       const userCards = JSON.parse(localStorage.getItem('userHouseCards') || '[]');
-      setCards([...userCards, ...mockCardsData]);
+      
+      // กรอง duplicate cards
+      const allCards = [...userCards];
+      const uniqueCards = allCards.filter((card, index, self) => 
+        index === self.findIndex(c => c.id === card.id)
+      );
+      
+      setCards(uniqueCards);
     }
   };
 
@@ -338,7 +340,17 @@ const AnimatedCards: React.FC<AnimatedCardsProps> = ({ newCards = [] }) => {
   const getCurrentPageCards = (): CardData[] => {
     const startIndex = (currentPage - 1) * cardsPerPage;
     const endIndex = startIndex + cardsPerPage;
-    return cards.slice(startIndex, endIndex);
+    const currentPageCards = cards.slice(startIndex, endIndex);
+    
+    // Debug: ตรวจสอบ duplicate IDs
+    const ids = currentPageCards.map(card => card.id);
+    const duplicateIds = ids.filter((id, index) => ids.indexOf(id) !== index);
+    if (duplicateIds.length > 0) {
+      console.warn('🚨 Duplicate card IDs found:', duplicateIds);
+      console.warn('🚨 All current page cards:', currentPageCards.map(c => ({ id: c.id, title: c.title })));
+    }
+    
+    return currentPageCards;
   };
 
   const goToPage = (page: number) => {
@@ -393,49 +405,135 @@ const AnimatedCards: React.FC<AnimatedCardsProps> = ({ newCards = [] }) => {
   const handleDeleteCard = async (cardId: string | number, event: React.MouseEvent) => {
     event.stopPropagation(); // ป้องกันการเปิด modal
     
-    console.log('Delete button clicked, user:', user, 'isAdmin:', isAdmin(), 'role:', user?.role);
+    console.log('Delete button clicked:', {
+      cardId,
+      cardType: typeof cardId,
+      user: user?.name || user?.email,
+      isAdmin: isAdmin(),
+      role: user?.role
+    });
     
-    // Allow any authenticated user to delete cards for now (temporary fix)
+    // ตรวจสอบการ authentication
     if (!user) {
-      alert('กรุณาเข้าสู่ระบบก่อนลบประกาศ');
+      setErrorDialog({
+        isOpen: true,
+        title: 'ต้องเข้าสู่ระบบ',
+        message: 'กรุณาเข้าสู่ระบบก่อนลบประกาศ',
+      });
       return;
     }
 
-    const confirmDelete = confirm('คุณแน่ใจหรือไม่ที่จะลบประกาศนี้? การดำเนินการนี้ไม่สามารถย้อนกลับได้');
-    
-    if (!confirmDelete) return;
+    // แสดง confirm dialog
+    setConfirmDialog({
+      isOpen: true,
+      title: 'ลบประกาศ',
+      message: 'คุณแน่ใจหรือไม่ที่จะลบประกาศนี้? การดำเนินการนี้ไม่สามารถย้อนกลับได้',
+      type: 'danger',
+      onConfirm: () => performDelete(cardId),
+    });
+  };
+
+  const performDelete = async (cardId: string | number) => {
+    setConfirmDialog(prev => ({ ...prev, isOpen: false }));
 
     setDeletingCardId(cardId);
 
     try {
-      // ลบจาก localStorage ก่อน (สำหรับ user cards)
-      const userCards = JSON.parse(localStorage.getItem('userHouseCards') || '[]');
-      const updatedUserCards = userCards.filter((card: any) => card.id !== cardId);
-      localStorage.setItem('userHouseCards', JSON.stringify(updatedUserCards));
+      let deleteSuccess = false;
 
-      // ลบจาก state
-      setCards(prevCards => prevCards.filter(card => card.id !== cardId));
-
-      // ถ้าเป็น card จาก backend ให้เรียก API ลบ
-      if (typeof cardId === 'string' && cardId.length > 10) {
+      // ตรวจสอบว่าเป็น card จาก backend หรือ local card
+      const isBackendCard = typeof cardId === 'string' && cardId.length > 10; // Mock data มี ID 1, 2, 3
+      
+      if (isBackendCard) {
         try {
+          // ตรวจสอบ token ก่อนเรียก API
+          const { authStorage } = await import('@/lib/auth-storage');
+          const token = authStorage.getAccessToken();
+          console.log('🔑 Current token exists:', !!token);
+          console.log('🔑 Token length:', token?.length || 0);
+          
+          if (!token) {
+            alert('ไม่พบ token การยืนยันตัวตน กรุณาเข้าสู่ระบบใหม่');
+            return;
+          }
+
           const { houseSalesAPI } = await import('@/lib/api/house-sales');
-          await houseSalesAPI.deleteHouseSale(cardId);
-          console.log('✅ Card deleted from backend successfully');
-        } catch (apiError) {
-          console.warn('⚠️ Failed to delete from backend (card removed from UI):', apiError);
+          const result = await houseSalesAPI.deleteHouseSale(cardId);
+          console.log('✅ Backend delete result:', result);
+          deleteSuccess = true;
+        } catch (apiError: any) {
+          console.error('❌ Failed to delete from backend:', apiError);
+          
+          // ตรวจสอบ error message เพื่อให้ feedback ที่ชัดเจน
+          if (apiError.message?.includes('403') || apiError.message?.includes('Forbidden')) {
+            setErrorDialog({
+              isOpen: true,
+              title: 'ไม่มีสิทธิ์',
+              message: 'คุณไม่มีสิทธิ์ลบประกาศนี้ เฉพาะเจ้าของประกาศเท่านั้นที่สามารถลบได้',
+            });
+          } else if (apiError.message?.includes('401') || apiError.message?.includes('Unauthorized')) {
+            setErrorDialog({
+              isOpen: true,
+              title: 'หมดเวลาเข้าใช้',
+              message: 'Token หมดอายุแล้ว กรุณาเข้าสู่ระบบใหม่',
+            });
+            // Clear invalid token
+            const { authStorage } = await import('@/lib/auth-storage');
+            authStorage.clearAll();
+            // Redirect to login after dialog closes
+            setTimeout(() => {
+              if (typeof window !== 'undefined') {
+                window.location.href = '/auth/login';
+              }
+            }, 2000);
+          } else if (apiError.message?.includes('404') || apiError.message?.includes('not found')) {
+            setErrorDialog({
+              isOpen: true,
+              title: 'ไม่พบข้อมูล',
+              message: 'ไม่พบประกาศที่ต้องการลบ อาจถูกลบไปแล้วหรือไม่มีอยู่จริง',
+            });
+          } else {
+            setErrorDialog({
+              isOpen: true,
+              title: 'เกิดข้อผิดพลาด',
+              message: 'เกิดข้อผิดพลาดในการลบประกาศจากเซิร์ฟเวอร์: ' + (apiError.message || 'Unknown error'),
+            });
+          }
+          return; // หยุดการทำงานถ้าลบจาก backend ไม่สำเร็จ
         }
+      } else {
+        // สำหรับ local cards (localStorage)
+        deleteSuccess = true;
       }
 
-      // Trigger event เพื่อให้ components อื่นอัพเดท
-      if (typeof window !== 'undefined') {
-        window.dispatchEvent(new Event('houseSaleDeleted'));
-      }
+      // ถ้าลบสำเร็จ ให้อัพเดท UI (สำหรับ backend และ local cards เท่านั้น)
+      if (deleteSuccess) {
+        // ลบจาก localStorage (สำหรับ user cards)
+        const userCards = JSON.parse(localStorage.getItem('userHouseCards') || '[]');
+        const updatedUserCards = userCards.filter((card: any) => card.id !== cardId);
+        localStorage.setItem('userHouseCards', JSON.stringify(updatedUserCards));
 
-      alert('ลบประกาศสำเร็จ');
+        // ลบจาก state
+        setCards(prevCards => prevCards.filter(card => card.id !== cardId));
+
+        // Trigger event เพื่อให้ components อื่นอัพเดท
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new Event('houseSaleDeleted'));
+        }
+
+        setSuccessDialog({
+          isOpen: true,
+          title: 'ลบสำเร็จ',
+          message: 'ลบประกาศสำเร็จแล้ว',
+        });
+      }
     } catch (error) {
       console.error('Error deleting card:', error);
-      alert('เกิดข้อผิดพลาดในการลบประกาศ');
+      setErrorDialog({
+        isOpen: true,
+        title: 'เกิดข้อผิดพลาด',
+        message: 'เกิดข้อผิดพลาดในการลบประกาศ กรุณาลองใหม่อีกครั้ง',
+      });
     } finally {
       setDeletingCardId(null);
     }
@@ -460,7 +558,41 @@ const AnimatedCards: React.FC<AnimatedCardsProps> = ({ newCards = [] }) => {
   const currentCards = getCurrentPageCards();
 
   if (loading) {
-    return null;
+    return (
+      <div className="py-12 sm:py-16 lg:py-24">
+        <div className="max-w-none mx-auto px-4 sm:px-6 lg:px-8" style={{ maxWidth: "1400px" }}>
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="mt-4 text-gray-600">กำลังโหลดข้อมูล...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show empty state if no cards
+  if (cards.length === 0) {
+    return (
+      <div className="py-12 sm:py-16 lg:py-24">
+        <div className="max-w-none mx-auto px-4 sm:px-6 lg:px-8" style={{ maxWidth: "1400px" }}>
+          <div className="text-center">
+            <div className="text-6xl mb-4">🏠</div>
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-4">
+              ยังไม่มีประกาศขายบ้าน
+            </h2>
+            <p className="text-gray-600 dark:text-gray-300 mb-8">
+              เป็นคนแรกที่โพสต์ประกาศขายบ้านของคุณ
+            </p>
+            <button
+              onClick={() => window.location.href = '/sell-house'}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+            >
+              โพสต์ขายบ้าน
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -500,7 +632,7 @@ const AnimatedCards: React.FC<AnimatedCardsProps> = ({ newCards = [] }) => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
           {currentCards.map((card, index) => (
             <div
-              key={card.id}
+              key={`card-${card.id}-${index}`}
               className="group relative bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1 flex flex-col h-full"
             >
               {/* Image Section */}
@@ -514,7 +646,7 @@ const AnimatedCards: React.FC<AnimatedCardsProps> = ({ newCards = [] }) => {
                   }}
                 />
 
-                {/* Delete Button - Show for all authenticated users */}
+                {/* Delete Button - Show for authenticated users */}
                 {user && (
                   <button
                     onClick={(e) => handleDeleteCard(card.id, e)}
@@ -537,6 +669,7 @@ const AnimatedCards: React.FC<AnimatedCardsProps> = ({ newCards = [] }) => {
 
                 {/* Badges */}
                 <div className="absolute top-3 right-3 flex flex-col gap-1">
+                  {/* Original badges only */}
                   {card.badges.slice(0, 2).map((badge, badgeIndex) => (
                     <span
                       key={badgeIndex}
@@ -1091,6 +1224,30 @@ const AnimatedCards: React.FC<AnimatedCardsProps> = ({ newCards = [] }) => {
           overflow: hidden;
         }
       `}</style>
+
+      {/* Custom Dialogs */}
+      <ConfirmDialog
+        isOpen={confirmDialog.isOpen}
+        title={confirmDialog.title}
+        message={confirmDialog.message}
+        type={confirmDialog.type}
+        onConfirm={confirmDialog.onConfirm}
+        onCancel={() => setConfirmDialog(prev => ({ ...prev, isOpen: false }))}
+      />
+
+      <SuccessDialog
+        isOpen={successDialog.isOpen}
+        title={successDialog.title}
+        message={successDialog.message}
+        onClose={() => setSuccessDialog(prev => ({ ...prev, isOpen: false }))}
+      />
+
+      <ErrorDialog
+        isOpen={errorDialog.isOpen}
+        title={errorDialog.title}
+        message={errorDialog.message}
+        onClose={() => setErrorDialog(prev => ({ ...prev, isOpen: false }))}
+      />
     </div>
   );
 };

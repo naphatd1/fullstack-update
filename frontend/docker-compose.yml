@@ -1,0 +1,13 @@
+services:
+  nextjs-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        ENV_FILE: .env.production   # build-time env
+    container_name: nextjs-app
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env.local                 # runtime env
+    restart: always

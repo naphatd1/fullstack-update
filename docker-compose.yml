@@ -1,0 +1,30 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: naphatd/backend:3.0.0
+    ports:
+      - "4000:4000"
+    env_file:
+      - ./backend/.env.production
+    restart: always
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: naphatd/frontend:3.0.0
+    ports:
+      - "3007:3000"
+    environment:
+      # ใช้ชื่อ service backend แทน IP เพื่อให้ container frontend คุย backend ได้
+      NEXT_PUBLIC_BASE_URL: "http://frontend:3007"
+      NEXT_PUBLIC_API_URL: "http://backend:4000/api"
+      NEXT_PUBLIC_SUPABASE_URL: "https://yzipuzbsddkddehabbch.supabase.co"
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl6aXB1emJzZGRrZGRlaGFiYmNoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY4NzQ0NjEsImV4cCI6MjA2MjQ1MDQ2MX0.RK6RqFE1e6wEbt3o9PIfv2UU2ftur2cmKDPAClVhTN8"
+    restart: always
+
+networks:
+  default:
+    name: my-app-network

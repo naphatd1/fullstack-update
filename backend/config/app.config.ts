@@ -5,7 +5,7 @@ export const appConfig = {
 
   // Rate limiting
   rateLimitTtl: parseInt(process.env.RATE_LIMIT_TTL) || 60,
-  rateLimitLimit: parseInt(process.env.RATE_LIMIT_LIMIT) || 10,
+  rateLimitLimit: parseInt(process.env.RATE_LIMIT_LIMIT) || 60,
 
   // Logging
   logLevel: process.env.LOG_LEVEL || "info",

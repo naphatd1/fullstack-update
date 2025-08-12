@@ -1,60 +1,66 @@
-# Use Node.js 18 Alpine as base image
+# Base image with Node.js LTS (latest)
 FROM node:22-alpine AS base
 
-# Install dependencies only when needed
+# -------------------
+# Install dependencies
+# -------------------
 FROM base AS deps
 WORKDIR /app
 
 # Copy package files
 COPY package*.json ./
-COPY bun.lock* ./
 
-# Install dependencies (including devDependencies for build)
+# Install dependencies
 RUN npm ci
 
-# Rebuild the source code only when needed
+# -------------------
+# Build application
+# -------------------
 FROM base AS builder
 WORKDIR /app
 
-# Copy package files and install all dependencies (including dev)
+# Copy package files and install dependencies
 COPY package*.json ./
 RUN npm ci
 
 # Copy source code
 COPY . .
 
-# Copy environment file based on build argument
-ARG ENV_FILE=.env.production
-COPY ${ENV_FILE} ./.env.production
+# Copy client environment file for build-time variables
+# Only NEXT_PUBLIC_* variables will be embedded
+ARG ENV_FILE=.env.local
+COPY ${ENV_FILE} ./.env.local
 
-# Build the application
+# Build Next.js app in standalone mode
 RUN npm run build
 
-# Production image, copy all the files and run next
+# -------------------
+# Production image
+# -------------------
 FROM base AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
 
-# Create nextjs user
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
+# Create non-root user
+RUN addgroup --system --gid 1001 nodejs \
+    && adduser --system --uid 1001 nextjs
 
-# Copy built application
+# Copy public files
 COPY --from=builder /app/public ./public
 
-# Automatically leverage output traces to reduce image size
-# https://nextjs.org/docs/advanced-features/output-file-tracing
+# Copy standalone server output
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 USER nextjs
 
-# Expose port 8000 (matching our frontend port)
+# Expose runtime port
 EXPOSE 3000
 
+# Server-side env variables will be passed at runtime
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-# Start the application
+# Start the standalone server
 CMD ["node", "server.js"]

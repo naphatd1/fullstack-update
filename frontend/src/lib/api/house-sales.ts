@@ -59,6 +59,7 @@ export interface HouseSaleData {
   // รูปภาพและป้ายกำกับ
   images?: string[];
   badges?: string[];
+  selectedBadges?: string[];
   
   // สถิติ
   views?: number;
@@ -233,16 +234,25 @@ class HouseSalesAPI {
 
   async deleteHouseSale(id: string): Promise<{ success: boolean; message: string }> {
     try {
+      const headers = this.getAuthHeaders();
+      console.log('🗑️ Deleting house sale:', { id, headers: { ...headers, Authorization: headers.Authorization ? 'Bearer [HIDDEN]' : 'No token' } });
+      
       const response = await fetch(`${API_BASE_URL}/house-sales/${id}`, {
         method: 'DELETE',
-        headers: this.getAuthHeaders(),
+        headers,
       });
 
+      console.log('🗑️ Delete response status:', response.status);
+
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        console.error('🗑️ Delete error response:', errorText);
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
       }
 
-      return await response.json();
+      const result = await response.json();
+      console.log('🗑️ Delete success:', result);
+      return result;
     } catch (error) {
       console.error('Error deleting house sale:', error);
       throw error;

@@ -207,7 +207,7 @@ const ImageCarousel: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="relative w-full h-[50vh] xs:h-[55vh] sm:h-[60vh] md:h-[65vh] lg:h-[70vh] xl:h-[75vh] 2xl:h-[80vh] bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 dark:from-gray-700 dark:via-gray-800 dark:to-gray-700 rounded-xl sm:rounded-2xl overflow-hidden shadow-lg sm:shadow-xl lg:shadow-2xl">
+      <div className="relative w-full h-[65vh] xs:h-[72vh] sm:h-[78vh] md:h-[85vh] lg:h-[91vh] xl:h-[98vh] 2xl:h-[104vh] bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 dark:from-gray-700 dark:via-gray-800 dark:to-gray-700 rounded-xl sm:rounded-2xl overflow-hidden shadow-lg sm:shadow-xl lg:shadow-2xl">
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="relative">
             <div className="animate-spin rounded-full h-12 w-12 sm:h-16 sm:w-16 border-4 border-blue-200 border-t-blue-600"></div>
@@ -220,7 +220,7 @@ const ImageCarousel: React.FC = () => {
 
   if (images.length === 0) {
     return (
-      <div className="relative w-full h-[50vh] xs:h-[55vh] sm:h-[60vh] md:h-[65vh] lg:h-[70vh] xl:h-[75vh] 2xl:h-[80vh] bg-gradient-to-br from-gray-100 via-gray-50 to-gray-200 dark:from-gray-700 dark:via-gray-800 dark:to-gray-900 rounded-xl sm:rounded-2xl overflow-hidden flex items-center justify-center shadow-lg sm:shadow-xl lg:shadow-2xl">
+      <div className="relative w-full h-[65vh] xs:h-[72vh] sm:h-[78vh] md:h-[85vh] lg:h-[91vh] xl:h-[98vh] 2xl:h-[104vh] bg-gradient-to-br from-gray-100 via-gray-50 to-gray-200 dark:from-gray-700 dark:via-gray-800 dark:to-gray-900 rounded-xl sm:rounded-2xl overflow-hidden flex items-center justify-center shadow-lg sm:shadow-xl lg:shadow-2xl">
         <div className="text-center px-4">
           <div className="w-16 h-16 bg-gray-300 dark:bg-gray-600 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg className="w-8 h-8 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -238,7 +238,7 @@ const ImageCarousel: React.FC = () => {
 
   return (
     <div 
-      className="relative w-full h-[50vh] xs:h-[55vh] sm:h-[60vh] md:h-[65vh] lg:h-[70vh] xl:h-[75vh] 2xl:h-[80vh] rounded-xl sm:rounded-2xl overflow-hidden shadow-lg sm:shadow-xl lg:shadow-2xl group cursor-grab active:cursor-grabbing"
+      className="relative w-full h-[65vh] xs:h-[72vh] sm:h-[78vh] md:h-[85vh] lg:h-[91vh] xl:h-[98vh] 2xl:h-[104vh] rounded-xl sm:rounded-2xl overflow-hidden shadow-lg sm:shadow-xl lg:shadow-2xl group cursor-grab active:cursor-grabbing"
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
