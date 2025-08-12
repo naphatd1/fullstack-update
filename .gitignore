@@ -62,7 +62,8 @@ pids
 *.pid
 *.seed
 *.pid.lock
-
+.gitignore
+thai-province-data-master
 # Coverage directory used by tools like istanbul
 coverage/
 *.lcov

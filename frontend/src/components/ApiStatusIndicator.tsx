@@ -94,7 +94,7 @@ const ApiStatusIndicator: React.FC = () => {
     checkApiStatus();
     
     // Set up interval for periodic checks
-    const interval = setInterval(checkApiStatus, 30000); // Check every 30 seconds
+    const interval = setInterval(checkApiStatus, 90000); // Check every 30 seconds
     
     return () => clearInterval(interval);
   }, []);
