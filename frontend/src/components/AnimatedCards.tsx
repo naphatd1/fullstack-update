@@ -19,10 +19,7 @@ import ConfirmDialog from "./ConfirmDialog";
 import SuccessDialog from "./SuccessDialog";
 import ErrorDialog from "./ErrorDialog";
 
-interface PostData {
-  text: string;
-  image_urls: string[];
-}
+
 
 interface CardData {
   id: number;
@@ -53,126 +50,9 @@ interface AnimatedCardsProps {
   newCards?: CardData[];
 }
 
-// Function to parse property data from text
-const parsePropertyData = (text: string, index: number): CardData => {
-  // Extract price
-  const priceMatch = text.match(/(\d+\.?\d*)\s*ล[บา]/);
-  const price = priceMatch ? priceMatch[1] : "0";
 
-  // Extract bedrooms
-  const bedroomMatch = text.match(/(\d+)\s*ห้องนอน/);
-  const bedrooms = bedroomMatch ? parseInt(bedroomMatch[1]) : 3;
 
-  // Extract bathrooms
-  const bathroomMatch = text.match(/(\d+)\s*ห้องน้ำ/);
-  const bathrooms = bathroomMatch ? parseInt(bathroomMatch[1]) : 2;
-
-  // Extract parking spaces
-  const parkingMatch = text.match(/(\d+)\s*คัน|(\d+)\s*ที่จอด/);
-  const parkingSpaces = parkingMatch ? parseInt(parkingMatch[1] || parkingMatch[2]) : 1;
-
-  // Extract floors
-  const floorsMatch = text.match(/(\d+)\s*ชั้น/);
-  const floors = floorsMatch ? parseInt(floorsMatch[1]) : 2;
-
-  // Extract usable area (ตร.ม.)
-  const usableAreaMatch = text.match(/(\d+\.?\d*)\s*ตร\.?ม/);
-  const usableArea = usableAreaMatch ? `${usableAreaMatch[1]} ตร.ม.` : "120 ตร.ม.";
-
-  // Extract land area (ตร.ว.)
-  const landAreaMatch = text.match(/(\d+\.?\d*)\s*ตร\.?ว/);
-  const landArea = landAreaMatch ? `${landAreaMatch[1]} ตร.ว.` : "35 ตร.ว.";
-
-  // Extract location/project name
-  let location = "";
-  let title = "";
-
-  if (text.includes("นวลจันทร์")) {
-    location = "นวลจันทร์";
-    title = "ทาวน์โฮม 2 ชั้น ทำเลนวลจันทร์";
-  } else if (text.includes("ปิ่นเกล้า")) {
-    location = "ปิ่นเกล้า-จรัญ";
-    title = "ทาวน์โฮมหลังริม ปิ่นเกล้า-จรัญ";
-  } else if (text.includes("ลำลูกกา")) {
-    location = "ลำลูกกา ปทุมธานี";
-    title = "ทาวน์เฮ้าส์ พฤกษา 17 ลำลูกกา";
-  } else {
-    location = "กรุงเทพฯ";
-    title = "บ้านคุณภาพ ทำเลดี";
-  }
-
-  // Create description
-  const description = text.split("\n")[0].substring(0, 150) + "...";
-
-  // Determine badges based on content
-  const badges = [];
-  if (text.includes("ขายด่วน")) badges.push("ขายด่วน");
-  if (text.includes("รีโนเวท")) badges.push("รีโนเวทใหม่");
-  if (text.includes("พร้อมอยู่")) badges.push("พร้อมอยู่");
-  if (text.includes("ฟรี")) badges.push("โปรโมชั่น");
-  if (text.includes("ใกล้รถไฟฟ้า")) badges.push("ใกล้รถไฟฟ้า");
-  if (badges.length === 0) badges.push("คุณภาพ");
-
-  // Generate consistent stats based on index
-  const views = 500 + ((index * 123) % 3000);
-  const likes = 50 + ((index * 67) % 200);
-  const rating = (4.0 + ((index * 0.1) % 1.0)).toFixed(1);
-
-  return {
-    id: index + 1,
-    title,
-    description,
-    image: "", // Will be set from image_urls
-    badges,
-    stats: {
-      views,
-      likes,
-      rating: parseFloat(rating),
-    },
-    date: new Date(Date.now() - index * 2 * 24 * 60 * 60 * 1000).toISOString(),
-    category: "ทาวน์โฮม",
-    price: price + "00,000",
-    location,
-    bedrooms,
-    bathrooms,
-    floors,
-    parkingSpaces,
-    usableArea,
-    landArea,
-    fullText: text,
-    imageUrls: [],
-  };
-};
-
-// Load posts data
-const loadPostsData = async (): Promise<CardData[]> => {
-  try {
-    const response = await fetch("/posts.json");
-    const posts: PostData[] = await response.json();
-
-    // Return empty array if no posts
-    if (!posts || posts.length === 0) {
-      return [];
-    }
-
-    return posts.map((post, index) => {
-      const cardData = parsePropertyData(post.text, index);
-      return {
-        ...cardData,
-        image:
-          post.image_urls[0] ||
-          "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&h=600&fit=crop",
-        imageUrls: post.image_urls,
-      };
-    });
-  } catch (error) {
-    console.error("Error loading posts data:", error);
-    return [];
-  }
-};
-
-// Mock data removed - only show real user posts and API data
-const mockCardsData: CardData[] = [];
+// Mock data และ posts.json ถูกลบออกถาวรแล้ว - แสดงเฉพาะข้อมูลจาก localStorage เท่านั้น
 
 const AnimatedCards: React.FC<AnimatedCardsProps> = ({ newCards = [] }) => {
   const { isAdmin, user } = useAuth();
@@ -232,47 +112,20 @@ const AnimatedCards: React.FC<AnimatedCardsProps> = ({ newCards = [] }) => {
   const cardsPerPage = 3;
   const totalPages = Math.ceil(cards.length / cardsPerPage);
 
-  // Load posts data on component mount
+  // โหลดข้อมูลเฉพาะจาก localStorage (บ้านที่ผู้ใช้โพสต์ขาย)
   useEffect(() => {
-    const loadData = async () => {
+    const loadData = () => {
       setLoading(true);
       try {
-
-        // โหลดข้อมูลจาก API
-        const postsData = await loadPostsData();
-        
-        // โหลดข้อมูลจาก localStorage (บ้านที่ผู้ใช้เพิ่มเอง)
+        // โหลดข้อมูลจาก localStorage เท่านั้น
         const userCards = JSON.parse(localStorage.getItem('userHouseCards') || '[]');
         
-        // รวมข้อมูลจาก user posts และ API เท่านั้น (ไม่มี mock data)
-        const allCards = [...userCards, ...postsData];
+        console.log('📊 User cards loaded:', userCards.length);
         
-        // กรอง duplicate cards โดยใช้ ID เป็นหลัก
-        const uniqueCards = allCards.filter((card, index, self) => 
-          index === self.findIndex(c => c.id === card.id)
-        );
-        
-        console.log('📊 Cards loaded:', {
-          userCards: userCards.length,
-          postsData: postsData.length,
-          total: allCards.length,
-          unique: uniqueCards.length
-        });
-        
-        setCards(uniqueCards);
+        setCards(userCards);
       } catch (error) {
-        console.error("Failed to load data:", error);
-        
-        // ถ้าโหลด API ไม่ได้ ให้ใช้ข้อมูลผู้ใช้เท่านั้น
-        const userCards = JSON.parse(localStorage.getItem('userHouseCards') || '[]');
-        
-        // กรอง duplicate cards
-        const allCards = [...userCards];
-        const uniqueCards = allCards.filter((card, index, self) => 
-          index === self.findIndex(c => c.id === card.id)
-        );
-        
-        setCards(uniqueCards);
+        console.error("Failed to load user cards:", error);
+        setCards([]);
       } finally {
         setLoading(false);
       }
@@ -293,28 +146,13 @@ const AnimatedCards: React.FC<AnimatedCardsProps> = ({ newCards = [] }) => {
   }, [newCards]);
 
   // ฟังก์ชันสำหรับ refresh cards จาก localStorage
-  const refreshCards = async () => {
+  const refreshCards = () => {
     try {
-      const postsData = await loadPostsData();
       const userCards = JSON.parse(localStorage.getItem('userHouseCards') || '[]');
-      const allCards = [...userCards, ...postsData];
-      
-      // กรอง duplicate cards
-      const uniqueCards = allCards.filter((card, index, self) => 
-        index === self.findIndex(c => c.id === card.id)
-      );
-      
-      setCards(uniqueCards);
+      setCards(userCards);
     } catch (error) {
-      const userCards = JSON.parse(localStorage.getItem('userHouseCards') || '[]');
-      
-      // กรอง duplicate cards
-      const allCards = [...userCards];
-      const uniqueCards = allCards.filter((card, index, self) => 
-        index === self.findIndex(c => c.id === card.id)
-      );
-      
-      setCards(uniqueCards);
+      console.error("Failed to refresh user cards:", error);
+      setCards([]);
     }
   };
 
@@ -670,7 +508,7 @@ const AnimatedCards: React.FC<AnimatedCardsProps> = ({ newCards = [] }) => {
                 {/* Badges */}
                 <div className="absolute top-3 right-3 flex flex-col gap-1">
                   {/* Original badges only */}
-                  {card.badges.slice(0, 2).map((badge, badgeIndex) => (
+                  {card.badges.slice(0, 3).map((badge, badgeIndex) => (
                     <span
                       key={badgeIndex}
                       className="bg-white/90 dark:bg-gray-800/90 text-gray-800 dark:text-white px-2 py-1 rounded-md text-xs font-medium shadow-sm"
@@ -1138,14 +976,14 @@ const AnimatedCards: React.FC<AnimatedCardsProps> = ({ newCards = [] }) => {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-                  <button className="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white py-3 sm:py-4 px-6 rounded-xl font-medium transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl text-sm sm:text-base">
-                    📞 ติดต่อเจ้าของ
+                <div className="flex gap-3">
+                  <button 
+                    onClick={() => window.location.href = '/public-contact'}
+                    className="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white py-3 sm:py-4 px-6 rounded-xl font-medium transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl text-sm sm:text-base"
+                  >
+                    📞 ติดต่อนายหน้า
                   </button>
-                  <button className="flex-1 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white py-3 sm:py-4 px-6 rounded-xl font-medium transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl text-sm sm:text-base">
-                    🏠 นัดชมบ้าน
-                  </button>
-                  <button className="sm:w-auto w-full p-3 sm:p-4 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors duration-300 flex items-center justify-center">
+                  <button className="sm:w-auto w-auto p-3 sm:p-4 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors duration-300 flex items-center justify-center">
                     <span className="text-gray-600 text-xl sm:text-2xl">♡</span>
                   </button>
                 </div>

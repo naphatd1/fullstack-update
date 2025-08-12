@@ -78,7 +78,7 @@ const HouseSaleForm: React.FC<HouseSaleFormProps> = ({ onSubmit, onClose }) => {
     sellerName: "",
     sellerPhone: "",
     sellerEmail: "",
-    sellerType: "เจ้าของ",
+    sellerType: "นายหน้า",
     
     // เหตุผลในการขาย
     saleReason: "",
@@ -124,9 +124,9 @@ const HouseSaleForm: React.FC<HouseSaleFormProps> = ({ onSubmit, onClose }) => {
   ];
 
   const sellerTypes = [
+    "นายหน้า",
     "เจ้าของ",
     "นิติบุคคล",
-    "นายหน้า",
     "ตัวแทน",
   ];
 
@@ -174,6 +174,87 @@ const HouseSaleForm: React.FC<HouseSaleFormProps> = ({ onSubmit, onClose }) => {
         ...prev,
         [name]: value,
       }));
+    }
+  };
+
+  // Handle price input with comma formatting
+  const handlePriceChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    fieldName: 'price' | 'downPayment'
+  ) => {
+    const value = e.target.value;
+    
+    // Remove all non-digit characters
+    const numericValue = value.replace(/[^\d]/g, '');
+    
+    // Format with commas
+    const formattedValue = numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    
+    setFormData((prev) => ({
+      ...prev,
+      [fieldName]: formattedValue,
+    }));
+  };
+
+  // Convert number to Thai text
+  const numberToThaiText = (numStr: string): string => {
+    if (!numStr || numStr === '0') return '';
+    
+    const num = parseInt(numStr.replace(/,/g, ''));
+    if (isNaN(num) || num === 0) return '';
+    
+    if (num >= 1000000) {
+      const millions = Math.floor(num / 1000000);
+      const remainder = num % 1000000;
+      if (remainder === 0) {
+        return `${millions} ล้านบาท`;
+      } else if (remainder >= 100000) {
+        const hundredThousands = Math.floor(remainder / 100000);
+        return `${millions} ล้าน ${hundredThousands} แสนบาท`;
+      } else if (remainder >= 10000) {
+        const tenThousands = Math.floor(remainder / 10000);
+        return `${millions} ล้าน ${tenThousands} หมื่นบาท`;
+      } else if (remainder >= 1000) {
+        const thousands = Math.floor(remainder / 1000);
+        return `${millions} ล้าน ${thousands} พันบาท`;
+      } else {
+        return `${millions} ล้าน ${remainder} บาท`;
+      }
+    } else if (num >= 100000) {
+      const hundredThousands = Math.floor(num / 100000);
+      const remainder = num % 100000;
+      if (remainder === 0) {
+        return `${hundredThousands} แสนบาท`;
+      } else if (remainder >= 10000) {
+        const tenThousands = Math.floor(remainder / 10000);
+        return `${hundredThousands} แสน ${tenThousands} หมื่นบาท`;
+      } else if (remainder >= 1000) {
+        const thousands = Math.floor(remainder / 1000);
+        return `${hundredThousands} แสน ${thousands} พันบาท`;
+      } else {
+        return `${hundredThousands} แสน ${remainder} บาท`;
+      }
+    } else if (num >= 10000) {
+      const tenThousands = Math.floor(num / 10000);
+      const remainder = num % 10000;
+      if (remainder === 0) {
+        return `${tenThousands} หมื่นบาท`;
+      } else if (remainder >= 1000) {
+        const thousands = Math.floor(remainder / 1000);
+        return `${tenThousands} หมื่น ${thousands} พันบาท`;
+      } else {
+        return `${tenThousands} หมื่น ${remainder} บาท`;
+      }
+    } else if (num >= 1000) {
+      const thousands = Math.floor(num / 1000);
+      const remainder = num % 1000;
+      if (remainder === 0) {
+        return `${thousands} พันบาท`;
+      } else {
+        return `${thousands} พัน ${remainder} บาท`;
+      }
+    } else {
+      return `${num} บาท`;
     }
   };
 
@@ -240,8 +321,11 @@ const HouseSaleForm: React.FC<HouseSaleFormProps> = ({ onSubmit, onClose }) => {
     // Combine and remove duplicates
     const allBadges = [...new Set([...selectedBadgeLabels, ...autoBadges])];
 
+    // Remove selectedBadges from data before sending to API
+    const { selectedBadges, ...dataWithoutSelectedBadges } = formData;
+
     const finalData = {
-      ...formData,
+      ...dataWithoutSelectedBadges,
       badges: allBadges,
       images: formData.images.length > 0 ? formData.images : [
         "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&h=600&fit=crop"
@@ -325,11 +409,16 @@ const HouseSaleForm: React.FC<HouseSaleFormProps> = ({ onSubmit, onClose }) => {
               type="text"
               name="price"
               value={formData.price}
-              onChange={handleInputChange}
+              onChange={(e) => handlePriceChange(e, 'price')}
               placeholder="เช่น 4,500,000"
               className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               required
             />
+            {formData.price && (
+              <p className="text-sm text-blue-600 mt-1 font-medium">
+                {numberToThaiText(formData.price)}
+              </p>
+            )}
           </div>
         </div>
 
@@ -341,10 +430,15 @@ const HouseSaleForm: React.FC<HouseSaleFormProps> = ({ onSubmit, onClose }) => {
             type="text"
             name="downPayment"
             value={formData.downPayment}
-            onChange={handleInputChange}
+            onChange={(e) => handlePriceChange(e, 'downPayment')}
             placeholder="เช่น 500,000"
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
+          {formData.downPayment && (
+            <p className="text-sm text-green-600 mt-1 font-medium">
+              {numberToThaiText(formData.downPayment)}
+            </p>
+          )}
         </div>
       </div>
 

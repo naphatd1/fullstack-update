@@ -130,10 +130,17 @@ export const authHelpers = {
     return path.startsWith('/auth/');
   },
 
-  // Check if current page is home page
+  // Check if current page is home page or public page
   isHomePage: (pathname?: string): boolean => {
     const path = pathname || (typeof window !== 'undefined' ? window.location.pathname : '');
     return path === '/';
+  },
+
+  // Check if current page is a public page that doesn't require auth
+  isPublicPage: (pathname?: string): boolean => {
+    const path = pathname || (typeof window !== 'undefined' ? window.location.pathname : '');
+    const publicPages = ['/', '/public-contact'];
+    return publicPages.includes(path);
   },
 
   // Get appropriate redirect path based on user role

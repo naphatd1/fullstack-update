@@ -54,13 +54,13 @@ const ReduxInitializer: React.FC<{ children: React.ReactNode }> = ({ children })
     });
 
     const isAuthPage = authHelpers.isAuthPage(pathname);
-    const isHomePage = authHelpers.isHomePage(pathname);
+    const isPublicPage = authHelpers.isPublicPage(pathname);
     
     // Don't redirect if still loading or not initialized
     if (loading || !isInitialized) return;
 
-    // If not authenticated and not on auth/home pages, redirect to login
-    if (!isAuthenticated && !isAuthPage && !isHomePage) {
+    // If not authenticated and not on auth/public pages, redirect to login
+    if (!isAuthenticated && !isAuthPage && !isPublicPage) {
       console.log('🚫 Not authenticated, redirecting to login');
       authHelpers.safeRedirect('/auth/login');
     }

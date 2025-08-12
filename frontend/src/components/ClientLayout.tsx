@@ -32,9 +32,16 @@ function RootLayoutContent({ children }: { children: React.ReactNode }) {
     '/profile'
   ];
   
-  const usesSidebar = sidebarPages.some(page => pathname?.startsWith(page));
+  // Pages that have their own layout (don't need the main Layout wrapper)
+  const customLayoutPages = [
+    '/contact',
+    '/public-contact'
+  ];
   
-  if (usesSidebar) {
+  const usesSidebar = sidebarPages.some(page => pathname?.startsWith(page));
+  const usesCustomLayout = customLayoutPages.some(page => pathname?.startsWith(page));
+  
+  if (usesSidebar || usesCustomLayout) {
     return <>{children}</>;
   }
   

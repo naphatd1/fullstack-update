@@ -23,6 +23,7 @@ import {
   Lock, 
   Globe, 
   Smartphone,
+  MessageCircle,
   ArrowRight,
   CheckCircle,
   Star
@@ -166,6 +167,27 @@ const HomePage: React.FC = () => {
                 </h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
                   ลงประกาศขายบ้านและอสังหาริมทรัพย์
+                </p>
+              </div>
+            </Link>
+
+            <Link
+              href="/public-contact"
+              className="group relative overflow-hidden bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-green-500 to-green-600 opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="p-3 rounded-xl bg-green-100 dark:bg-green-900/30 group-hover:bg-green-200 dark:group-hover:bg-green-900/50 transition-colors duration-300">
+                    <MessageCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
+                  </div>
+                  <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-green-600 transition-colors duration-300" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                  ติดต่อนายหน้า
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  ติดต่อสอบถามข้อมูลเพิ่มเติมกับนายหน้ามืออาชีพ
                 </p>
               </div>
             </Link>

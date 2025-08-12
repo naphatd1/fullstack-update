@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { LogOut, User, Settings, Home, FileText, Upload, Activity, Menu, X } from 'lucide-react';
+import { LogOut, User, Settings, Home, FileText, Upload, Activity, Menu, X, MessageCircle } from 'lucide-react';
 import ThemeToggleFallback from '../ThemeToggleFallback';
 import HydrationBoundary from '../HydrationBoundary';
 import PermissionGuard from '../PermissionGuard';
@@ -138,6 +138,10 @@ const Navbar: React.FC = () => {
               </>
             ) : (
               <div className="flex items-center space-x-2 ml-4">
+                <Link href="/public-contact" className="flex items-center space-x-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 hover:bg-slate-100 dark:hover:bg-slate-800">
+                  <MessageCircle className="w-4 h-4" />
+                  <span className="hidden xl:inline">ติดต่อ</span>
+                </Link>
                 <Link href="/auth/login" className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 hover:bg-slate-100 dark:hover:bg-slate-800">
                   Login
                 </Link>
@@ -223,6 +227,10 @@ const Navbar: React.FC = () => {
                 </>
               ) : (
                 <>
+                  <Link href="/public-contact" className="flex items-center space-x-3 px-4 py-3 rounded-xl text-base font-medium text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200" onClick={() => setIsMobileMenuOpen(false)}>
+                    <MessageCircle className="w-5 h-5" />
+                    <span>ติดต่อนายหน้า</span>
+                  </Link>
                   <Link href="/auth/login" className="block px-4 py-3 rounded-xl text-base font-medium text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200" onClick={() => setIsMobileMenuOpen(false)}>
                     Login
                   </Link>

@@ -15,6 +15,7 @@ import { SystemStatus } from './SystemStatus';
 import { NotificationsPanel } from './NotificationsPanel';
 import { UsageStats } from './UsageStats';
 import { UpcomingEvents } from './UpcomingEvents';
+import CustomerContacts from './CustomerContacts';
 
 import { Calendar, FileText } from 'lucide-react';
 
@@ -182,6 +183,11 @@ const StableDashboard: React.FC = () => {
           </SafeComponent>
         </div>
       </div>
+
+      {/* Customer Contacts Section */}
+      <SafeComponent componentName="Customer Contacts">
+        <CustomerContacts />
+      </SafeComponent>
 
       {/* Recent Posts Section */}
       <RecentPostsSection posts={posts} />
