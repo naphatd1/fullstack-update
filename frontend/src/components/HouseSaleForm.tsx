@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Home,
   MapPin,
@@ -25,6 +25,7 @@ import {
 // import ImageUploader from "./ImageUploader"; // ใช้ inline upload แทน
 
 import { HouseSaleData } from "@/lib/api/house-sales";
+import { provinces } from "@/data/provinces";
 
 type HouseSaleFormData = HouseSaleData;
 
@@ -106,15 +107,12 @@ const HouseSaleForm: React.FC<HouseSaleFormProps> = ({ onSubmit, onClose }) => {
     "เพนท์เฮ้าส์",
   ];
 
-  const provinces = [
-    "กรุงเทพมหานคร",
-    "นนทบุรี",
-    "ปทุมธานี",
-    "สมุทรปราการ",
-    "สมุทรสาคร",
-    "นครปฐม",
-    // เพิ่มจังหวัดอื่นๆ ตามต้องการ
-  ];
+  // Get districts for selected province
+  const availableDistricts = useMemo(() => {
+    if (!formData.province) return [];
+    const selectedProvince = provinces.find(p => p.name === formData.province);
+    return selectedProvince ? selectedProvince.districts : [];
+  }, [formData.province]);
 
   const ownershipTypes = [
     "เจ้าของเดียว",
@@ -173,6 +171,8 @@ const HouseSaleForm: React.FC<HouseSaleFormProps> = ({ onSubmit, onClose }) => {
       setFormData((prev) => ({
         ...prev,
         [name]: value,
+        // Reset district when province changes
+        ...(name === "province" ? { district: "" } : {}),
       }));
     }
   };
@@ -578,8 +578,8 @@ const HouseSaleForm: React.FC<HouseSaleFormProps> = ({ onSubmit, onClose }) => {
           >
             <option value="">เลือกจังหวัด</option>
             {provinces.map((province) => (
-              <option key={province} value={province}>
-                {province}
+              <option key={province.id} value={province.name}>
+                {province.name}
               </option>
             ))}
           </select>
@@ -589,14 +589,22 @@ const HouseSaleForm: React.FC<HouseSaleFormProps> = ({ onSubmit, onClose }) => {
           <label className="block text-sm font-medium text-gray-700 mb-2">
             เขต/อำเภอ
           </label>
-          <input
-            type="text"
+          <select
             name="district"
             value={formData.district}
             onChange={handleInputChange}
-            placeholder="เช่น บางนา"
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
+            disabled={!formData.province}
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+          >
+            <option value="">
+              {formData.province ? "เลือกเขต/อำเภอ" : "เลือกจังหวัดก่อน"}
+            </option>
+            {availableDistricts.map((district) => (
+              <option key={district.id} value={district.name}>
+                {district.name}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div>
